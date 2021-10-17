@@ -37,6 +37,7 @@ async def on_message(msg):
           msgContent[i] = msgContent[i].replace('!ERT!LOG','')
           msgContent[i] = msgContent[i].strip()
 
+        msgContent[i] = msgContent[i].lower()
 
       #print(msgContent)
 
@@ -61,11 +62,25 @@ async def on_message(msg):
 
   if msg.content.startswith('!ERT!SOURCE'):
 
-    await.msg.channel.send('')
+    await msg.channel.send('https://github.com/liammac1/ERT-BOT')
 
   if msg.content.startswith('!ERT!HELP'):
 
-    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG your discord username, place you are going into, expected return time in military format (ex: 1:23pm = 13:23), tools used to enter\"\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share iformation, such as tokens or key phrases.')
+    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG your discord username, place you are going into, expected return time in military format (ex: 1:23pm = 13:23), tools used to enter\"\n\n!ERT!OUT: Logs a user out of the ERT bot. Please always log out after loggin in. Does not work if you have not yet logged in. Format: \"!ERT!OUT your username\". Does not need anything else but your username, so dont put anything else.\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share iformation, such as tokens or key phrases.')
+
+
+
+  if msg.content.startswith('!ERT!OUT'):
+    
+    try:
+      tmp = msg.content
+      tmp = tmp.replace('!ERT!OUT','')
+      tmp = tmp.strip()
+      del runningLog[tmp]
+      await msg.channel.send('Thank you ' + tmp + ", you have succesfully logged out.")
+    except:
+      await msg.channel.send('ERROR: Your login was not found. Make sure you check out with the same name you logged in with, and that you logged in in the first place.')
+
 
 #token, if you're looking at this as source code, fuck you, you cant see this value
 client.run(os.environ['TOKEN'])
