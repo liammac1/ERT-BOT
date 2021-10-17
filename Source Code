@@ -1,0 +1,72 @@
+import discord
+import os
+
+runningLog = {}
+
+#creating client instance (discord connection)
+client = discord.Client()
+
+#connecting
+@client.event
+async def on_ready():
+  print("Connected as {0.user}".format(client))
+
+#message recieved
+@client.event
+async def on_message(msg):
+  #dont do shit for own msg
+  if msg.author == client.user:
+    return
+  #see if command
+  if msg.content.startswith('!ERT!LOG'):
+    
+    try:
+
+      tmpMsg = msg.content
+
+      msgContent = tmpMsg.split(',')
+
+      #print(msgContent)
+
+      for i in range(len(msgContent)):
+
+        msgContent[i] = msgContent[i].strip()
+
+        if '!ERT!LOG' in msgContent[i]:
+
+          msgContent[i] = msgContent[i].replace('!ERT!LOG','')
+          msgContent[i] = msgContent[i].strip()
+
+
+      #print(msgContent)
+
+
+      runningLog[msgContent[0]]=msgContent
+
+      #print(runningLog)
+
+
+      await msg.channel.send('Log recorded. Good luck.')
+
+    except Exception as e:
+
+      print(e)
+
+      await msg.channel.send( 'ERROR: Log not recorded, try again. Proper format: \"!ERT!LOG Your discord name, Place you are going into, expected return time (IN MILITARY FORMAT - EX: 1:23pm = 13:23), tools used to enter\"' )
+
+
+  if msg.content.startswith(os.environ['adminLog']):
+
+    await msg.channel.send(runningLog)
+
+  if msg.content.startswith('!ERT!SOURCE'):
+
+    await.msg.channel.send('')
+
+  if msg.content.startswith('!ERT!HELP'):
+
+    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG your discord username, place you are going into, expected return time in military format (ex: 1:23pm = 13:23), tools used to enter\"\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share iformation, such as tokens or key phrases.')
+
+#token, if you're looking at this as source code, fuck you, you cant see this value
+client.run(os.environ['TOKEN'])
+
