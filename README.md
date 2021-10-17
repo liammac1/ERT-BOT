@@ -1,2 +1,2 @@
 # ERT-BOT
-Nah
+For those interested in the inner workings
