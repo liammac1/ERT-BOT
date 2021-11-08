@@ -1,7 +1,35 @@
 import discord
 import os
 
-runningLog = {}
+
+#google bullshit
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SERVICE_ACCOUNT_FILE = 'keys.json'
+creds = None
+creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE,scopes=SCOPES)
+SPREADSHEET_ID = os.environ['SpreadID']
+service = build('sheets','v4',credentials=creds)
+sheet = service.spreadsheets()
+
+
+
+#runningLog = {}
+
+
+def searchSheet(strWant):
+  result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:D120").execute()
+  values = result.get('values',[])
+
+
+  for i in range(len(values)):
+
+    if values[i][0] == strWant:
+
+      return i+1
+
+  return None
 
 #creating client instance (discord connection)
 client = discord.Client()
@@ -42,8 +70,9 @@ async def on_message(msg):
       #print(msgContent)
 
 
-      runningLog[msgContent[0]]=msgContent
-
+      #runningLog[msgContent[0]]=msgContent
+      aoa = [msgContent]
+      sheet.values().append(spreadsheetId = SPREADSHEET_ID, range = "log!A1",valueInputOption="USER_ENTERED",body={"values":aoa}).execute()
       #print(runningLog)
 
 
@@ -57,8 +86,8 @@ async def on_message(msg):
 
 
   if msg.content.startswith(os.environ['adminLog']):
-
-    await msg.channel.send(runningLog)
+    result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:D120").execute()
+    await msg.channel.send(result.get('values',[]))
 
   if msg.content.startswith('!ERT!SOURCE'):
 
@@ -76,12 +105,19 @@ async def on_message(msg):
       tmp = msg.content
       tmp = tmp.replace('!ERT!OUT','')
       tmp = tmp.strip()
-      del runningLog[tmp]
-      await msg.channel.send('Thank you ' + tmp + ", you have succesfully logged out.")
+
+      strClear = "A" + str(searchSheet(tmp)) + ":D" + str(searchSheet(tmp))
+      sheet.values().clear(spreadsheetId = SPREADSHEET_ID, range = ("log!"+strClear)).execute()
+
+      #del runningLog[tmp]
+      await msg.channel.send('Thank you, ' + tmp + ", you have succesfully logged out.")
     except:
       await msg.channel.send('ERROR: Your login was not found. Make sure you check out with the same name you logged in with, and that you logged in in the first place.')
+
+
 
 
 #token, if you're looking at this as source code, fuck you, you cant see this value
 client.run(os.environ['TOKEN'])
 
+#todo: get it so that the dictionary is checked every 5 minutes to see if there is anyone that should be back that hasnt logged out. If the person hasnt logged out, send them a message, wait a minute, send the ERT a message if they havent logged out yet
