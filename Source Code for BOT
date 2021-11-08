@@ -1,6 +1,8 @@
 import discord
 import os
 
+#web server import
+from keepalive import keep_alive
 
 #google bullshit
 from google.oauth2 import service_account
@@ -116,6 +118,8 @@ async def on_message(msg):
 
 
 
+
+keep_alive()
 
 #token, if you're looking at this as source code, fuck you, you cant see this value
 client.run(os.environ['TOKEN'])
