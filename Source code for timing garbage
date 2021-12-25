@@ -1,7 +1,11 @@
 from threading import Thread
 import os
 import time
-from callmain import uhuhohnono
+import requests
+from discord import Webhook, RequestsWebhookAdapter
+
+webhook = Webhook.from_url(os.environ['webhookURL'], adapter=RequestsWebhookAdapter())
+
 
 #google bullshit
 from google.oauth2 import service_account
@@ -17,11 +21,9 @@ sheet = service.spreadsheets()
 def check_times():
   result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:E120").execute()
   values = result.get('values',[])
-  print(values)
   for i in values:
     try:
-      print(i)
-      if int(i[2].replace(" ","")) <= 0 : uhuhohnono()
+      if int(i[2].replace(" ","")) <= 0 : webhook.send(os.environ['ADMIN_WARNING'])
     except:
       continue
 
@@ -38,7 +40,6 @@ def allthisgarbage():
     for i in range (0,len(values)):
       #what cell curr
       tmp = "C" + str(i+1)
-      print(tmp, str(values[i][0]))
       if str(values[i]) != "":
         try: 
           num = int(values[i][0]) - 1
