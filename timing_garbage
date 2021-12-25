@@ -1,0 +1,62 @@
+from threading import Thread
+import os
+import time
+from callmain import uhuhohnono
+
+#google bullshit
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SERVICE_ACCOUNT_FILE = 'keys.json'
+creds = None
+creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE,scopes=SCOPES)
+SPREADSHEET_ID = os.environ['SpreadID']
+service = build('sheets','v4',credentials=creds)
+sheet = service.spreadsheets()
+
+def check_times():
+  result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:E120").execute()
+  values = result.get('values',[])
+  print(values)
+  for i in values:
+    try:
+      print(i)
+      if int(i[2].replace(" ","")) <= 0 : uhuhohnono()
+    except:
+      continue
+
+  
+
+  
+
+def allthisgarbage():
+  while True:
+    time.sleep(60)
+
+    result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!C1:C120").execute()
+    values = result.get('values',[])
+    for i in range (0,len(values)):
+      #what cell curr
+      tmp = "C" + str(i+1)
+      print(tmp, str(values[i][0]))
+      if str(values[i]) != "":
+        try: 
+          num = int(values[i][0]) - 1
+          rangename = tmp
+          myvals = [[num]]
+          Body = {'values':myvals,}
+          result = service.spreadsheets().values().update(
+      spreadsheetId=SPREADSHEET_ID, range=rangename,
+      valueInputOption='RAW', body=Body).execute()  
+        except:
+          continue
+
+    check_times()
+
+  
+  
+
+def timing_shit():
+  t = Thread(target = allthisgarbage)
+  t.start()
+
