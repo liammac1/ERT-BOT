@@ -21,7 +21,7 @@ sheet = service.spreadsheets()
 
 
 def searchSheet(strWant):
-  result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:D120").execute()
+  result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:E120").execute()
   values = result.get('values',[])
 
 
@@ -52,12 +52,13 @@ async def on_message(msg):
     
     try:
 
-      tmpMsg = msg.content
+      tmpMsg =  str(msg.author) + "," + msg.content
 
       msgContent = tmpMsg.split(',')
 
       #print(msgContent)
 
+      
       for i in range(len(msgContent)):
 
         msgContent[i] = msgContent[i].strip()
@@ -77,18 +78,17 @@ async def on_message(msg):
       sheet.values().append(spreadsheetId = SPREADSHEET_ID, range = "log!A1",valueInputOption="USER_ENTERED",body={"values":aoa}).execute()
       #print(runningLog)
 
-
       await msg.channel.send('Log recorded. Good luck.')
 
     except Exception as e:
 
       print(e)
 
-      await msg.channel.send( 'ERROR: Log not recorded, try again. Proper format: \"!ERT!LOG Your discord name, Place you are going into, expected return time (IN MILITARY FORMAT - EX: 1:23pm = 13:23), tools used to enter\"' )
+      await msg.channel.send( 'ERROR: Log not recorded, try again. Proper format: \"!ERT!LOG Place you are going into, expected return time (IN MINUTES, EX: for 2 hours, enter 120), tools used to enter, contact info (*OPTIONAL*)\"' )
 
 
   if msg.content.startswith(os.environ['adminLog']):
-    result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:D120").execute()
+    result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:E120").execute()
     await msg.channel.send(result.get('values',[]))
 
   if msg.content.startswith('!ERT!SOURCE'):
@@ -97,27 +97,38 @@ async def on_message(msg):
 
   if msg.content.startswith('!ERT!HELP'):
 
-    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG your discord username, place you are going into, expected return time in military format (ex: 1:23pm = 13:23), tools used to enter\"\n\n!ERT!OUT: Logs a user out of the ERT bot. Please always log out after loggin in. Does not work if you have not yet logged in. Format: \"!ERT!OUT your username\". Does not need anything else but your username, so dont put anything else.\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share iformation, such as tokens or key phrases.')
+    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG your discord username, place you are going into, expected return time in minute format (gone for 2 hours? Enter 120 as the value), tools used to enter\"\n\n!ERT!OUT: Logs a user out of the ERT bot. Please always log out after loggin in. Does not work if you have not yet logged in. Format: \"!ERT!OUT\". Does not need anything else but the command, so dont put anything else.\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share information, such as tokens or key phrases.')
 
 
 
   if msg.content.startswith('!ERT!OUT'):
     
     try:
-      tmp = msg.content
-      tmp = tmp.replace('!ERT!OUT','')
-      tmp = tmp.strip()
+      tmp = str(msg.author).strip()
+      tmp = tmp.lower()
 
-      strClear = "A" + str(searchSheet(tmp)) + ":D" + str(searchSheet(tmp))
+      strClear = "A" + str(searchSheet(tmp)) + ":E" + str(searchSheet(tmp))
       sheet.values().clear(spreadsheetId = SPREADSHEET_ID, range = ("log!"+strClear)).execute()
 
       #del runningLog[tmp]
       await msg.channel.send('Thank you, ' + tmp + ", you have succesfully logged out.")
     except:
-      await msg.channel.send('ERROR: Your login was not found. Make sure you check out with the same name you logged in with, and that you logged in in the first place.')
+      await msg.channel.send('ERROR: Your login was not found. Make sure you check out with the same account you logged in with, and that you logged in in the first place.')
 
 
-
+  if msg.content.startswith(os.environ['ADMIN_WARNING']):
+    result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:E120").execute()
+    values = result.get('values',[])
+    tmplist = []
+    print(values)
+    for i in values:
+      try:
+        print(i)
+        if int(i[2].replace(" ","")) <= 0 : tmplist.append(i)
+      except:
+        continue
+    tempc = client.get_channel(os.environ['ChannelID'])
+    await tempc.send(tmplist)
 
 keep_alive()
 
