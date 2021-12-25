@@ -3,6 +3,8 @@ import os
 
 #web server import
 from keepalive import keep_alive
+#timing shit
+from timingshit import timing_shit
 
 #google bullshit
 from google.oauth2 import service_account
@@ -97,7 +99,7 @@ async def on_message(msg):
 
   if msg.content.startswith('!ERT!HELP'):
 
-    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG your discord username, place you are going into, expected return time in minute format (gone for 2 hours? Enter 120 as the value), tools used to enter\"\n\n!ERT!OUT: Logs a user out of the ERT bot. Please always log out after loggin in. Does not work if you have not yet logged in. Format: \"!ERT!OUT\". Does not need anything else but the command, so dont put anything else.\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share information, such as tokens or key phrases.')
+    await msg.channel.send('Commands:\n\n!ERT!LOG: Messages starting with !ERT!LOG tell the bot to create a new log in order to make sure you stay safe. Format must be as follows:\n\"!ERT!LOG place you are going into, expected return time in minute format (gone for 2 hours? Enter 120 as the value), tools used to enter, and contact info (this last part is optional)\"\n\n!ERT!OUT: Logs a user out of the ERT bot. Please always log out after loggin in. Does not work if you have not yet logged in. Format: \"!ERT!OUT\". Does not need anything else but the command, so dont put anything else.\n\n!ERT!SOURCE: This will send you a link to the source code of the bot. Note that the writer of the code, Chappy, witholds the right to share information, such as tokens or key phrases.')
 
 
 
@@ -120,7 +122,6 @@ async def on_message(msg):
     result = sheet.values().get(spreadsheetId = SPREADSHEET_ID, range = "log!A1:E120").execute()
     values = result.get('values',[])
     tmplist = []
-    print(values)
     for i in values:
       try:
         print(i)
@@ -130,9 +131,11 @@ async def on_message(msg):
     tempc = client.get_channel(os.environ['ChannelID'])
     await tempc.send(tmplist)
 
+
+
+
+timing_shit()
 keep_alive()
 
 #token, if you're looking at this as source code, fuck you, you cant see this value
 client.run(os.environ['TOKEN'])
-
-#todo: get it so that the dictionary is checked every 5 minutes to see if there is anyone that should be back that hasnt logged out. If the person hasnt logged out, send them a message, wait a minute, send the ERT a message if they havent logged out yet
