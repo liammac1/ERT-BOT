@@ -124,11 +124,10 @@ async def on_message(msg):
     tmplist = []
     for i in values:
       try:
-        print(i)
         if int(i[2].replace(" ","")) <= 0 : tmplist.append(i)
       except:
         continue
-    tempc = client.get_channel(os.environ['ChannelID'])
+    tempc = client.get_channel(int(os.environ['ChannelID']))
     await tempc.send(tmplist)
 
 
